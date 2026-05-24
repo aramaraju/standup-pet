@@ -2,6 +2,12 @@
 
 A pixel-art animal that lives in your Mac menu bar and nudges you to stand up and move.
 
+## Screenshots
+
+| Working | Break due | Preferences |
+|:---:|:---:|:---:|
+| ![Working state — pet idle, countdown timer running](assets/screenshots/working.png) | ![Break-due state — pet nudging, action buttons shown](assets/screenshots/break-due.png) | ![Preferences panel — work interval, break duration, and other settings](assets/screenshots/preferences.png) |
+
 ## Overview
 
 Standup Pet is a gentle, charming reminder to take movement breaks throughout the day. A pixel companion lives in your menu bar, quietly working alongside you — and starts nudging when it's time to get up.
