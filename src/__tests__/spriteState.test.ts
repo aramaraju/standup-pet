@@ -15,8 +15,8 @@ describe("phaseToAnimation", () => {
     expect(phaseToAnimation("break-due")).toBe("nudge");
   });
 
-  it("breaking → happy", () => {
-    expect(phaseToAnimation("breaking")).toBe("happy");
+  it("breaking → sleeping (napping during the break)", () => {
+    expect(phaseToAnimation("breaking")).toBe("sleeping");
   });
 
   it("matches PHASE_ANIMATION_MAP exhaustively", () => {

@@ -15,12 +15,14 @@ export function phaseToAnimation(phase: Phase): AnimationKey {
     case "break-due":
       return "nudge";
     case "breaking":
-      return "happy";
+      // Breaking phase shows the pet napping — encourages the user to step
+      // away from the screen.
+      return "sleeping";
   }
 }
 
 export const PHASE_ANIMATION_MAP: Record<Phase, AnimationKey> = {
   working: "idle",
   "break-due": "nudge",
-  breaking: "happy",
+  breaking: "sleeping",
 };

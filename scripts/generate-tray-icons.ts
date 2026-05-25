@@ -14,7 +14,7 @@ import type { AnimationKey } from "../src/lib/spriteState.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, "../src-tauri/icons/tray");
-const TRAY_ANIMS: AnimationKey[] = ["idle", "nudge", "happy"];
+const TRAY_ANIMS: AnimationKey[] = ["idle", "nudge", "sleeping"];
 const TRAY_SCALE = 2; // 16px art → 32px for Retina menu bar
 
 function crc32(buf: Uint8Array): number {

@@ -21,28 +21,47 @@ import type { AnimationKey } from "./spriteState";
 
 export const SPRITE_SIZE = 16;
 
+/** A single frame: 16 rows of 16 chars each. */
+export type SpriteFrame = readonly string[];
+/** An animation: an ordered list of frames to cycle through. */
+export type FrameSequence = readonly SpriteFrame[];
+
 export interface PetSpriteSet {
   palette: Record<string, string | null>;
-  frames: Partial<Record<AnimationKey, readonly string[]>>;
+  frames: Partial<Record<AnimationKey, FrameSequence>>;
 }
 
 const ANIMS: readonly AnimationKey[] = ["idle", "nudge", "happy", "sleeping"];
 
 type EyePair = readonly [string, string];
 
+/**
+ * Build a 4-animation, single-frame-each set by splicing per-animation eye
+ * rows into a shared body template. Used when an animation only needs one
+ * frame; multi-frame animations are defined inline.
+ */
 function buildFrames(
   body: readonly string[],
   eyeIdx: number,
   eyes: Record<AnimationKey, EyePair>
-): Partial<Record<AnimationKey, readonly string[]>> {
-  const out: Partial<Record<AnimationKey, readonly string[]>> = {};
+): Partial<Record<AnimationKey, FrameSequence>> {
+  const out: Partial<Record<AnimationKey, FrameSequence>> = {};
   for (const anim of ANIMS) {
     const rows = body.slice();
     rows[eyeIdx] = eyes[anim][0];
     rows[eyeIdx + 1] = eyes[anim][1];
-    out[anim] = rows;
+    out[anim] = [rows];
   }
   return out;
+}
+
+/**
+ * Wrap an animation that already has explicit multi-frame data into the
+ * FrameSequence type. Use when you want a per-pet override for one
+ * animation while keeping the others from buildFrames.
+ */
+export function multiFrame(...frames: SpriteFrame[]): FrameSequence {
+  return frames;
 }
 
 /* ------------------------------------------------------------------ CAT */
@@ -261,7 +280,138 @@ const BEAR_EYES: Record<AnimationKey, EyePair> = {
   sleeping: ["oOOEEEOOOOEEEOOo", "oOOOOOOOOOOOOOOo"],
 };
 
-export const PET_SPRITES: Record<PetChoice, PetSpriteSet> = {
+/* ============================================================ MOTION HELPERS */
+/* Multi-frame sequencing — Claude Code "Clawd" mascot style: each frame is a   */
+/* complete redraw, no tweening. Per pet we add: glasses + blink to idle, a Z  */
+/* bubble cycle to sleeping. Defined here so the per-pet table below stays     */
+/* compact.                                                                    */
+
+function paint(row: string, cells: Array<[number, string]>): string {
+  const chars = row.split("");
+  for (const [i, ch] of cells) {
+    if (i >= 0 && i < chars.length) chars[i] = ch;
+  }
+  return chars.join("");
+}
+
+function withCells(
+  frame: SpriteFrame,
+  cells: Array<[number, number, string]>
+): SpriteFrame {
+  const rows = frame.slice();
+  const byRow = new Map<number, Array<[number, string]>>();
+  for (const [y, x, ch] of cells) {
+    if (y < 0 || y >= rows.length) continue;
+    const list = byRow.get(y) ?? [];
+    list.push([x, ch]);
+    byRow.set(y, list);
+  }
+  for (const [y, ops] of byRow) {
+    rows[y] = paint(rows[y], ops);
+  }
+  return rows;
+}
+
+/** Eyes at [[leftStart, leftEnd], [rightStart, rightEnd]] (inclusive cols). */
+type EyeBounds = readonly [readonly [number, number], readonly [number, number]];
+
+interface GlassesSpec {
+  /** Row directly above the eye-top row — frame tops go here. */
+  topRow: number;
+  eyes: EyeBounds;
+}
+
+/** Draw round specs: outline pixels framing each eye plus a bridge dot. */
+function addGlasses(frame: SpriteFrame, spec: GlassesSpec): SpriteFrame {
+  const [[l0, l1], [r0, r1]] = spec.eyes;
+  const bridgeCol = Math.floor((l1 + r0) / 2);
+  return withCells(frame, [
+    // Frame tops on the row above the eyes
+    [spec.topRow, l0 - 1, "o"],
+    [spec.topRow, l1 + 1, "o"],
+    [spec.topRow, r0 - 1, "o"],
+    [spec.topRow, r1 + 1, "o"],
+    [spec.topRow, bridgeCol, "o"],
+    // Frame sides on the eye-top row itself
+    [spec.topRow + 1, l0 - 1, "o"],
+    [spec.topRow + 1, l1 + 1, "o"],
+    [spec.topRow + 1, r0 - 1, "o"],
+    [spec.topRow + 1, r1 + 1, "o"],
+  ]);
+}
+
+interface ZSpec {
+  /** Top-left corner of the Z bubble; pixels grow down/right from here. */
+  row: number;
+  col: number;
+}
+
+/** Add a growing sleep-bubble Z. size 0 = nothing, 1 = single dot, 2 = larger. */
+function withZ(frame: SpriteFrame, size: 0 | 1 | 2, spec: ZSpec): SpriteFrame {
+  if (size === 0) return frame;
+  const { row, col } = spec;
+  if (size === 1) {
+    return withCells(frame, [[row, col, "W"]]);
+  }
+  return withCells(frame, [
+    [row - 1, col, "W"],
+    [row - 1, col + 1, "W"],
+    [row, col + 1, "W"],
+    [row + 1, col, "W"],
+    [row + 1, col + 1, "W"],
+  ]);
+}
+
+interface PetMotion {
+  glasses?: GlassesSpec;
+  z: ZSpec;
+}
+
+const PET_MOTION: Record<PetChoice, PetMotion> = {
+  cat:    { glasses: { topRow: 3, eyes: [[3, 4], [11, 12]] }, z: { row: 1, col: 14 } },
+  dog:    { glasses: { topRow: 3, eyes: [[5, 6], [11, 12]] }, z: { row: 1, col: 14 } },
+  frog:   { /* eyes are on top — skip glasses */                 z: { row: 4, col: 14 } },
+  turtle: { /* single side-eye on the poking head */             z: { row: 2, col: 13 } },
+  pig:    { glasses: { topRow: 3, eyes: [[3, 4], [11, 12]] }, z: { row: 1, col: 14 } },
+  duck:   { glasses: { topRow: 3, eyes: [[4, 5], [10, 11]] }, z: { row: 1, col: 14 } },
+  wolf:   { glasses: { topRow: 3, eyes: [[4, 5], [10, 11]] }, z: { row: 1, col: 14 } },
+  bear:   { glasses: { topRow: 3, eyes: [[3, 4], [11, 12]] }, z: { row: 1, col: 14 } },
+};
+
+/** Layer per-pet motion (glasses + sleep-Z cycle) onto a base single-frame set. */
+function applyMotion(set: PetSpriteSet, motion: PetMotion): PetSpriteSet {
+  const out: Partial<Record<AnimationKey, FrameSequence>> = {};
+
+  // Idle: 4-frame cycle of [open, open, open, blink]. Glasses on every frame
+  // so they don't pop. Blink reuses the closed-eye sleeping frame's eye rows.
+  const idle0 = set.frames.idle?.[0];
+  const blinkSrc = set.frames.sleeping?.[0];
+  if (idle0) {
+    const open = motion.glasses ? addGlasses(idle0, motion.glasses) : idle0;
+    const blinkBase = blinkSrc ?? idle0;
+    const blink = motion.glasses ? addGlasses(blinkBase, motion.glasses) : blinkBase;
+    out.idle = [open, open, open, blink];
+  }
+
+  // Sleeping: 4-frame Z-bubble cycle, growing from nothing → big → small.
+  const sleep0 = set.frames.sleeping?.[0];
+  if (sleep0) {
+    out.sleeping = [
+      withZ(sleep0, 0, motion.z),
+      withZ(sleep0, 1, motion.z),
+      withZ(sleep0, 2, motion.z),
+      withZ(sleep0, 1, motion.z),
+    ];
+  }
+
+  // Nudge/happy: keep as-is.
+  if (set.frames.nudge) out.nudge = set.frames.nudge;
+  if (set.frames.happy) out.happy = set.frames.happy;
+
+  return { palette: set.palette, frames: out };
+}
+
+const RAW_PET_SPRITES: Record<PetChoice, PetSpriteSet> = {
   cat: {
     palette: {
       ".": null,
@@ -386,31 +536,49 @@ export const PET_SPRITES: Record<PetChoice, PetSpriteSet> = {
   },
 };
 
+/* Apply per-pet motion (glasses + sleep-Z cycle) once at module load. */
+export const PET_SPRITES: Record<PetChoice, PetSpriteSet> = Object.fromEntries(
+  (Object.keys(RAW_PET_SPRITES) as PetChoice[]).map((pet) => [
+    pet,
+    applyMotion(RAW_PET_SPRITES[pet], PET_MOTION[pet]),
+  ])
+) as Record<PetChoice, PetSpriteSet>;
+
 function normalizeRow(row: string): string {
   if (row.length >= SPRITE_SIZE) return row.slice(0, SPRITE_SIZE);
   return row.padEnd(SPRITE_SIZE, ".");
 }
 
+/** Number of frames the given pet's animation has (≥1). */
+export function getFrameCount(pet: PetChoice, animation: AnimationKey): number {
+  const sequence =
+    PET_SPRITES[pet].frames[animation] ?? PET_SPRITES[pet].frames.idle;
+  return sequence ? Math.max(1, sequence.length) : 1;
+}
+
 export function getSpriteFrame(
   pet: PetChoice,
-  animation: AnimationKey
+  animation: AnimationKey,
+  frameIdx = 0
 ): { palette: Record<string, string | null>; rows: readonly string[] } {
   const set = PET_SPRITES[pet];
-  const raw =
+  const sequence =
     set.frames[animation] ??
     set.frames.idle ??
     PET_SPRITES.cat.frames.idle!;
-  const rows = raw.map(normalizeRow);
+  const frame = sequence[frameIdx % sequence.length] ?? sequence[0];
+  const rows = frame.map(normalizeRow);
   return { palette: set.palette, rows };
 }
 
-/** Flat RGBA buffer for PNG export (tray icons). */
+/** Flat RGBA buffer for PNG export (tray icons). Uses frame 0 by default. */
 export function spriteToRgba(
   pet: PetChoice,
   animation: AnimationKey,
-  scale = 1
+  scale = 1,
+  frameIdx = 0
 ): { width: number; height: number; data: Uint8Array } {
-  const { palette, rows } = getSpriteFrame(pet, animation);
+  const { palette, rows } = getSpriteFrame(pet, animation, frameIdx);
   const base = SPRITE_SIZE;
   const width = base * scale;
   const height = base * scale;
