@@ -78,6 +78,11 @@ describe("deserializeSettings", () => {
     expect(result.petChoice).toBe("dog");
   });
 
+  it("accepts valid petChoice 'frog'", () => {
+    const result = deserializeSettings({ petChoice: "frog" });
+    expect(result.petChoice).toBe("frog");
+  });
+
   it("sanitizes non-boolean soundEnabled to default", () => {
     const result = deserializeSettings({ soundEnabled: "yes" });
     expect(result.soundEnabled).toBe(DEFAULT_APP_SETTINGS.soundEnabled);

@@ -41,6 +41,10 @@ describe("getSpriteClass", () => {
     expect(getSpriteClass("dog", "nudge")).toBe("sprite--dog--nudge");
   });
 
+  it("returns correct class for frog idle", () => {
+    expect(getSpriteClass("frog", "idle")).toBe("sprite--frog--idle");
+  });
+
   it("returns correct class for cat happy", () => {
     expect(getSpriteClass("cat", "happy")).toBe("sprite--cat--happy");
   });
@@ -49,18 +53,18 @@ describe("getSpriteClass", () => {
 describe("getSpriteAltText", () => {
   it("cat idle has descriptive alt text", () => {
     const alt = getSpriteAltText("cat", "idle");
-    expect(alt).toContain("Cat");
+    expect(alt).toContain("Willow");
   });
 
   it("dog nudge has descriptive alt text", () => {
     const alt = getSpriteAltText("dog", "nudge");
-    expect(alt).toContain("Dog");
+    expect(alt).toContain("Spot");
     expect(alt.toLowerCase()).toContain("nudg");
   });
 
   it("cat happy has descriptive alt text", () => {
     const alt = getSpriteAltText("cat", "happy");
-    expect(alt).toContain("Cat");
+    expect(alt).toContain("Willow");
     expect(alt.toLowerCase()).toContain("break");
   });
 });

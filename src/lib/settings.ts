@@ -4,11 +4,14 @@
  */
 
 import { DEFAULT_SETTINGS, type MachineSettings } from "./timerMachine";
+import { DEFAULT_APP_PET, isPetChoice, type PetChoice } from "./pets";
+
+export type { PetChoice };
 
 export interface AppSettings extends MachineSettings {
   soundEnabled: boolean;
   launchAtLogin: boolean;
-  petChoice: "cat" | "dog";
+  petChoice: PetChoice;
   notificationsEnabled: boolean;
 }
 
@@ -16,7 +19,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   ...DEFAULT_SETTINGS,
   soundEnabled: true,
   launchAtLogin: false,
-  petChoice: "cat",
+  petChoice: DEFAULT_APP_PET,
   notificationsEnabled: true,
 };
 
@@ -36,8 +39,8 @@ function sanitizeBoolean(value: unknown, defaultValue: boolean): boolean {
   return value;
 }
 
-function sanitizePetChoice(value: unknown): "cat" | "dog" {
-  if (value === "cat" || value === "dog") return value;
+function sanitizePetChoice(value: unknown): PetChoice {
+  if (isPetChoice(value)) return value;
   return DEFAULT_APP_SETTINGS.petChoice;
 }
 

@@ -15,6 +15,7 @@ import {
   serializeSettings,
   type AppSettings,
 } from "./settings";
+import { notifyBreakDue, onPhaseChange } from "./reminders";
 
 const SETTINGS_KEY = "standup-pet-settings";
 
@@ -130,6 +131,16 @@ export function StoreProvider({ persistence = localStoragePersistence, children 
     }, 1000);
     return () => clearInterval(id);
   }, [dispatch]);
+
+  // Passive break-due reminders (Raycast Focus style — no focus steal)
+  const phase = state.machine.phase;
+  useEffect(() => {
+    onPhaseChange(phase);
+    void notifyBreakDue(
+      { pet: state.settings.petChoice, phase },
+      state.settings.notificationsEnabled
+    );
+  }, [phase, state.settings.petChoice, state.settings.notificationsEnabled]);
 
   return React.createElement(StoreContext.Provider, { value: { state, dispatch } }, children);
 }

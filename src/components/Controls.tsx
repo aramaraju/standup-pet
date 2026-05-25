@@ -1,5 +1,5 @@
 /**
- * <Controls/> component — "I moved" and snooze buttons.
+ * <Controls/> — phase hints; break-due actions live in ReminderBar (Raycast Focus style).
  */
 
 import { useStore } from "../lib/store";
@@ -12,18 +12,10 @@ export function Controls() {
     dispatch({ type: "MACHINE_EVENT", event: { type: "I_MOVED" } });
   };
 
-  const handleSnooze = () => {
-    dispatch({ type: "MACHINE_EVENT", event: { type: "SNOOZE" } });
-  };
-
-  const handleStartBreak = () => {
-    dispatch({ type: "MACHINE_EVENT", event: { type: "START_BREAK" } });
-  };
-
   if (phase === "working") {
     return (
       <div className="controls controls--working">
-        <p className="controls__hint">Keep it up! Your pet is waiting.</p>
+        <p className="controls__hint">Your companion is keeping you company.</p>
       </div>
     );
   }
@@ -31,40 +23,19 @@ export function Controls() {
   if (phase === "break-due") {
     return (
       <div className="controls controls--break-due">
-        <button
-          className="controls__btn controls__btn--primary"
-          onClick={handleStartBreak}
-          data-testid="start-break-btn"
-        >
-          Start break
-        </button>
-        <button
-          className="controls__btn controls__btn--moved"
-          onClick={handleMoved}
-          data-testid="moved-btn"
-        >
-          I moved
-        </button>
-        <button
-          className="controls__btn controls__btn--snooze"
-          onClick={handleSnooze}
-          data-testid="snooze-btn"
-        >
-          Snooze 5 min
-        </button>
+        <p className="controls__hint">Use the bar below when you&apos;re ready.</p>
       </div>
     );
   }
 
-  // breaking
   return (
     <div className="controls controls--breaking">
       <button
-        className="controls__btn controls__btn--moved"
+        className="controls__btn controls__btn--primary"
         onClick={handleMoved}
         data-testid="moved-btn"
       >
-        I moved — back to work
+        Back to work
       </button>
     </div>
   );

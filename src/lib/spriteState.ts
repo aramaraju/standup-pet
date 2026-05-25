@@ -4,17 +4,13 @@
  */
 
 import type { Phase } from "./timerMachine";
+import { getPetDefinition, type PetChoice } from "./pets";
 
+export type { PetChoice } from "./pets";
 export type AnimationKey = "idle" | "nudge" | "happy" | "sleeping";
-
-export type PetChoice = "cat" | "dog";
 
 /**
  * Maps a phase to the animation key to display.
- *
- * working   → "idle"      (pet quietly working alongside you)
- * break-due → "nudge"     (pet actively nudging you to move)
- * breaking  → "happy"     (pet happy you're taking a break)
  */
 export function phaseToAnimation(phase: Phase): AnimationKey {
   switch (phase) {
@@ -27,18 +23,12 @@ export function phaseToAnimation(phase: Phase): AnimationKey {
   }
 }
 
-/**
- * Returns the CSS class / asset path fragment for a given pet + animation.
- */
 export function getSpriteClass(pet: PetChoice, animation: AnimationKey): string {
   return `sprite--${pet}--${animation}`;
 }
 
-/**
- * Returns the alt text for accessibility.
- */
 export function getSpriteAltText(pet: PetChoice, animation: AnimationKey): string {
-  const petName = pet === "cat" ? "Cat" : "Dog";
+  const petName = getPetDefinition(pet).name;
   switch (animation) {
     case "idle":
       return `${petName} sitting quietly`;
@@ -51,10 +41,6 @@ export function getSpriteAltText(pet: PetChoice, animation: AnimationKey): strin
   }
 }
 
-/**
- * All valid phase → animation mappings as a lookup table.
- * Used for exhaustive test assertions.
- */
 export const PHASE_ANIMATION_MAP: Record<Phase, AnimationKey> = {
   working: "idle",
   "break-due": "nudge",

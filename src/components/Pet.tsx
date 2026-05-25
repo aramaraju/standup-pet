@@ -1,13 +1,13 @@
 /**
- * <Pet/> component — renders the pixel-art sprite for the current phase.
+ * <Pet/> — pixel companion for the current phase.
  */
 
 import { useStore } from "../lib/store";
 import { phaseToAnimation, getSpriteClass, getSpriteAltText } from "../lib/spriteState";
 import type { Phase } from "../lib/timerMachine";
+import { PixelSprite } from "./PixelSprite";
 
 interface PetProps {
-  /** Override phase for testing / Storybook */
   phaseOverride?: Phase;
 }
 
@@ -26,29 +26,9 @@ export function Pet({ phaseOverride }: PetProps) {
       aria-label={altText}
       data-phase={phase}
       data-animation={animation}
+      data-pet={pet}
     >
-      {/* Pixel art rendered via CSS background-image on the className */}
-      <span className="pet__emoji" aria-hidden="true">
-        {getPetEmoji(pet, animation)}
-      </span>
+      <PixelSprite pet={pet} animation={animation} size="lg" />
     </div>
   );
-}
-
-function getPetEmoji(pet: "cat" | "dog", animation: "idle" | "nudge" | "happy" | "sleeping"): string {
-  if (pet === "cat") {
-    switch (animation) {
-      case "idle":    return "🐱";
-      case "nudge":   return "😾";
-      case "happy":   return "😺";
-      case "sleeping": return "😴";
-    }
-  } else {
-    switch (animation) {
-      case "idle":    return "🐶";
-      case "nudge":   return "🐕";
-      case "happy":   return "🐩";
-      case "sleeping": return "😴";
-    }
-  }
 }

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "standup-pet",
+  "productName": "Standup Pet",
   "version": "0.1.0",
   "identifier": "com.aravind.standup-pet",
   "build": {
@@ -10,11 +10,26 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
-        "title": "standup-pet",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "Standup Pet",
+        "width": 360,
+        "height": 520,
+        "minWidth": 360,
+        "maxWidth": 360,
+        "minHeight": 480,
+        "maxHeight": 640,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": true,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "focus": false,
+        "shadow": true
       }
     ],
     "security": {
@@ -30,6 +45,9 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "minimumSystemVersion": "13.0"
+    }
   }
 }

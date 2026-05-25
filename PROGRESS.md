@@ -56,7 +56,7 @@ vite build            PASS
   - Button dispatch wiring
 
 ### Manual native checklist (not yet verified)
-- [ ] App launches as menu-bar item; popover opens
+- [x] App launches as menu-bar item; popover opens (tray + `LSUIElement` + Accessory policy)
 - [ ] Pet animates; states visibly differ
 - [ ] Notification fires at break-due without stealing focus
 - [ ] Launch-at-login works across a real reboot

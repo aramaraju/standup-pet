@@ -13,6 +13,8 @@ import { Pet } from "../components/Pet";
 import { Timer, formatMs } from "../components/Timer";
 import { Controls } from "../components/Controls";
 import { Preferences } from "../components/Preferences";
+import { ReminderBar } from "../components/ReminderBar";
+import { PetPicker } from "../components/PetPicker";
 
 const NOW = 1_000_000;
 
@@ -164,53 +166,16 @@ describe("<Controls/>", () => {
     expect(screen.queryByTestId("snooze-btn")).toBeNull();
   });
 
-  it("shows I moved + snooze + start break buttons in break-due", () => {
+  it("shows hint in break-due (actions in ReminderBar)", () => {
     renderWithStore(React.createElement(Controls), makeStoreState({ phase: "break-due" }));
-    expect(screen.getByTestId("moved-btn")).toBeInTheDocument();
-    expect(screen.getByTestId("snooze-btn")).toBeInTheDocument();
-    expect(screen.getByTestId("start-break-btn")).toBeInTheDocument();
+    expect(screen.queryByTestId("moved-btn")).toBeNull();
+    expect(screen.getByText(/bar below/i)).toBeInTheDocument();
   });
 
   it("shows only I moved button in breaking phase", () => {
     renderWithStore(React.createElement(Controls), makeStoreState({ phase: "breaking" }));
     expect(screen.getByTestId("moved-btn")).toBeInTheDocument();
     expect(screen.queryByTestId("snooze-btn")).toBeNull();
-  });
-
-  it("I moved button dispatches I_MOVED event", () => {
-    const { dispatch } = renderWithStore(
-      React.createElement(Controls),
-      makeStoreState({ phase: "break-due" })
-    );
-    fireEvent.click(screen.getByTestId("moved-btn"));
-    expect(dispatch).toHaveBeenCalledWith({
-      type: "MACHINE_EVENT",
-      event: { type: "I_MOVED" },
-    });
-  });
-
-  it("snooze button dispatches SNOOZE event", () => {
-    const { dispatch } = renderWithStore(
-      React.createElement(Controls),
-      makeStoreState({ phase: "break-due" })
-    );
-    fireEvent.click(screen.getByTestId("snooze-btn"));
-    expect(dispatch).toHaveBeenCalledWith({
-      type: "MACHINE_EVENT",
-      event: { type: "SNOOZE" },
-    });
-  });
-
-  it("start break button dispatches START_BREAK event", () => {
-    const { dispatch } = renderWithStore(
-      React.createElement(Controls),
-      makeStoreState({ phase: "break-due" })
-    );
-    fireEvent.click(screen.getByTestId("start-break-btn"));
-    expect(dispatch).toHaveBeenCalledWith({
-      type: "MACHINE_EVENT",
-      event: { type: "START_BREAK" },
-    });
   });
 
   it("I moved in breaking dispatches I_MOVED", () => {
@@ -276,15 +241,64 @@ describe("<Preferences/>", () => {
     );
   });
 
-  it("changing pet choice dispatches UPDATE_SETTINGS with petChoice", () => {
+  it("renders pet picker grid", () => {
+    renderWithStore(React.createElement(Preferences));
+    expect(screen.getByTestId("pet-picker")).toBeInTheDocument();
+    expect(screen.getByTestId("pet-tile-dog")).toBeInTheDocument();
+    expect(screen.getByTestId("pet-tile-frog")).toBeInTheDocument();
+  });
+
+  it("selecting pet tile dispatches UPDATE_SETTINGS with petChoice", () => {
     const { dispatch } = renderWithStore(React.createElement(Preferences));
-    const select = screen.getByTestId("pet-select");
-    fireEvent.change(select, { target: { value: "dog" } });
+    fireEvent.click(screen.getByTestId("pet-tile-dog"));
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "UPDATE_SETTINGS",
         settings: expect.objectContaining({ petChoice: "dog" }),
       })
     );
+  });
+});
+
+// --- ReminderBar component ---
+
+describe("<ReminderBar/>", () => {
+  it("hidden in working phase", () => {
+    renderWithStore(React.createElement(ReminderBar), makeStoreState({ phase: "working" }));
+    expect(screen.queryByTestId("reminder-bar")).toBeNull();
+  });
+
+  it("shows floating bar in break-due with actions", () => {
+    renderWithStore(React.createElement(ReminderBar), makeStoreState({ phase: "break-due" }));
+    expect(screen.getByTestId("reminder-bar")).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-start-break")).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-moved")).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-snooze")).toBeInTheDocument();
+  });
+
+  it("start break dispatches START_BREAK", () => {
+    const { dispatch } = renderWithStore(
+      React.createElement(ReminderBar),
+      makeStoreState({ phase: "break-due" })
+    );
+    fireEvent.click(screen.getByTestId("reminder-start-break"));
+    expect(dispatch).toHaveBeenCalledWith({
+      type: "MACHINE_EVENT",
+      event: { type: "START_BREAK" },
+    });
+  });
+});
+
+// --- PetPicker component ---
+
+describe("<PetPicker/>", () => {
+  it("calls onChange when tile clicked", () => {
+    const onChange = vi.fn();
+    renderWithStore(
+      React.createElement(PetPicker, { value: "cat", onChange }),
+      makeStoreState()
+    );
+    fireEvent.click(screen.getByTestId("pet-tile-bear"));
+    expect(onChange).toHaveBeenCalledWith("bear");
   });
 });

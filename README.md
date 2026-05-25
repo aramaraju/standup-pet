@@ -1,6 +1,6 @@
 # Standup Pet
 
-A pixel-art animal that lives in your Mac menu bar and nudges you to stand up and move.
+A pixel-art companion that lives in your **macOS menu bar** and nudges you to stand up and move. Click the tray icon to open the popover.
 
 ## Screenshots
 
@@ -15,8 +15,9 @@ Standup Pet is a gentle, charming reminder to take movement breaks throughout th
 - Configurable work intervals (default 50 min) and break durations (default 7 min)
 - "I moved" acknowledges your break and resets the cycle
 - Snooze option (up to 15 min total)
-- Choose between cat or dog companion
-- Optional sound and system notifications
+- Pick from 8 pixel companions (cat, dog, frog, turtle, pig, duck, wolf, bear)
+- Raycast Focus–style floating reminder bar when it's time to move
+- Optional passive system notifications that won't steal focus
 - Settings persist across restarts
 
 ## Stack
@@ -37,9 +38,11 @@ npm install
 # Start dev server (frontend only)
 npm run dev
 
-# Start Tauri dev build (frontend + native)
+# macOS menu bar app (frontend + native tray popover)
 npm run tauri dev
 ```
+
+On macOS this runs as a **menu bar utility** (no Dock icon): look for the tray icon near the clock, click it to open the popover. Right-click the icon for **Quit**.
 
 ## Automated verify
 
@@ -81,8 +84,11 @@ src/
 │   └── store.ts          # React context store + persistence
 ├── components/
 │   ├── Pet.tsx           # Sprite renderer
+│   ├── PixelSprite.tsx   # Pixel-framed companion glyph
+│   ├── PetPicker.tsx     # Grid pet selector (Pixel Pets style)
+│   ├── ReminderBar.tsx   # Raycast Focus–style floating nudge bar
 │   ├── Timer.tsx         # Phase label + countdown
-│   ├── Controls.tsx      # I moved / snooze / start break
+│   ├── Controls.tsx      # Phase hints + back-to-work
 │   └── Preferences.tsx   # Settings UI
 └── __tests__/
     ├── timerMachine.test.ts    # State machine tests (fake timers)
@@ -106,7 +112,7 @@ breaking ──(I moved)─────────► working
 
 After `npm run tauri build`:
 
-- [ ] App launches as a menu-bar item; popover opens on click
+- [x] App launches as a menu-bar item; popover opens on click
 - [ ] Pet animates; idle/nudge/happy states are visually distinct
 - [ ] Notification fires at break-due without stealing focus
 - [ ] Launch-at-login persists across a real reboot
