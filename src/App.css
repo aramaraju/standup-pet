@@ -16,9 +16,6 @@
   --radius-sm: 8px;
   --font-body: "DM Sans", system-ui, sans-serif;
   --font-pixel: "Press Start 2P", monospace;
-  --reminder-bg: rgba(28, 28, 30, 0.92);
-  --reminder-text: #f5f5f7;
-  --reminder-muted: #a1a1a6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -115,18 +112,7 @@ body {
   gap: 12px;
 }
 
-/* --- Pet display --- */
-
-.pet {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 0;
-}
-
-.pet[data-animation="nudge"] .pixel-sprite__frame {
-  animation: pet-nudge 0.6s ease-in-out infinite;
-}
+/* --- Pet nudge bounce (used by HUD when phase is break-due) --- */
 
 @keyframes pet-nudge {
   0%, 100% { transform: translateX(0); }
@@ -173,44 +159,7 @@ body {
   color: var(--text-muted);
 }
 
-/* --- Timer --- */
-
-.timer {
-  text-align: center;
-  width: 100%;
-}
-
-.timer__label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.timer__countdown {
-  font-family: var(--font-pixel);
-  font-size: 22px;
-  margin-top: 4px;
-  color: var(--text);
-}
-
-.timer[data-phase="break-due"] .timer__label {
-  color: var(--accent);
-}
-
-/* --- Controls --- */
-
-.controls {
-  width: 100%;
-  text-align: center;
-}
-
-.controls__hint {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-muted);
-}
+/* --- Button shared by WaterPanel actions --- */
 
 .controls__btn {
   width: 100%;
@@ -236,105 +185,6 @@ body {
 
 .controls__btn--primary:hover {
   filter: brightness(1.05);
-}
-
-/* --- Raycast Focus–style reminder bar --- */
-
-.reminder-bar {
-  position: fixed;
-  left: 50%;
-  bottom: 12px;
-  transform: translateX(-50%);
-  width: calc(100% - 24px);
-  max-width: 336px;
-  z-index: 100;
-  animation: reminder-slide-up 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes reminder-slide-up {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-.reminder-bar__inner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--reminder-bg);
-  border-radius: 14px;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 8px 32px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(20px);
-}
-
-.reminder-bar__icon .pixel-sprite__frame {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
-}
-
-.reminder-bar__copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.reminder-bar__title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--reminder-text);
-}
-
-.reminder-bar__subtitle {
-  font-size: 11px;
-  color: var(--reminder-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.reminder-bar__actions {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.reminder-bar__btn {
-  padding: 6px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--reminder-text);
-  cursor: pointer;
-}
-
-.reminder-bar__btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.reminder-bar__btn--primary {
-  background: #ff6b4a;
-  color: #fff;
-}
-
-.reminder-bar__btn--primary:hover {
-  background: #ff8266;
-}
-
-.reminder-bar__btn--ghost {
-  background: transparent;
-  color: var(--reminder-muted);
 }
 
 /* --- Pet picker (Pixel Pets grid) --- */
@@ -740,8 +590,3 @@ body {
   100% { opacity: 0; }
 }
 
-/* Make the overlay window's <html>/<body> transparent — Vite mounts into #root */
-body.flash-overlay-window,
-body.focus-hud-window {
-  background: transparent !important;
-}

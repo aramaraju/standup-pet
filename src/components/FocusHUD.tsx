@@ -8,7 +8,7 @@
 
 import { useStore } from "../lib/store";
 import { phaseToAnimation } from "../lib/spriteState";
-import { formatMs } from "./Timer";
+import { formatMs } from "../lib/time";
 import { PixelSprite } from "./PixelSprite";
 import { invoke } from "@tauri-apps/api/core";
 
