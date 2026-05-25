@@ -358,6 +358,62 @@ describe("handleTimeJump", () => {
 
 // --- Countdown never negative ---
 
+describe("PAUSE / RESUME", () => {
+  it("PAUSE freezes TICK so remainingMs stops decreasing", () => {
+    let s = makeState();
+    s = transition(s, { type: "TICK", nowMs: NOW + 3_000 });
+    expect(s.remainingMs).toBe(7_000);
+    s = transition(s, { type: "PAUSE", nowMs: NOW + 3_000 });
+    s = transition(s, { type: "TICK", nowMs: NOW + 10_000 });
+    expect(s.phase).toBe("working");
+    expect(s.remainingMs).toBe(7_000);
+  });
+
+  it("RESUME shifts phaseStartMs by the pause duration so countdown resumes intact", () => {
+    let s = makeState();
+    s = transition(s, { type: "PAUSE", nowMs: NOW + 2_000 });
+    s = transition(s, { type: "RESUME", nowMs: NOW + 8_000 });
+    expect(s.pausedAt).toBeNull();
+    s = transition(s, { type: "TICK", nowMs: NOW + 9_000 });
+    // 2s elapsed before pause + 1s after resume = 3s elapsed; 7s remaining
+    expect(s.remainingMs).toBe(7_000);
+  });
+
+  it("PAUSE is idempotent", () => {
+    let s = makeState();
+    s = transition(s, { type: "PAUSE", nowMs: NOW + 1_000 });
+    const paused = s.pausedAt;
+    s = transition(s, { type: "PAUSE", nowMs: NOW + 5_000 });
+    expect(s.pausedAt).toBe(paused);
+  });
+
+  it("RESUME is a no-op when not paused", () => {
+    let s = makeState();
+    s = transition(s, { type: "RESUME", nowMs: NOW + 1_000 });
+    expect(s.pausedAt).toBeNull();
+  });
+});
+
+describe("RESET event", () => {
+  it("from break-due returns to fresh working phase", () => {
+    let s = makeState();
+    s = transition(s, { type: "TICK", nowMs: NOW + 11_000 });
+    expect(s.phase).toBe("break-due");
+    s = transition(s, { type: "RESET", nowMs: NOW + 12_000 });
+    expect(s.phase).toBe("working");
+    expect(s.remainingMs).toBe(FAST_SETTINGS.workIntervalMs);
+    expect(s.snoozeCount).toBe(0);
+  });
+
+  it("clears pause when resetting", () => {
+    let s = makeState();
+    s = transition(s, { type: "PAUSE", nowMs: NOW + 2_000 });
+    s = transition(s, { type: "RESET", nowMs: NOW + 3_000 });
+    expect(s.pausedAt).toBeNull();
+    expect(s.phase).toBe("working");
+  });
+});
+
 describe("countdown never negative", () => {
   it("working phase countdown stays >= 0 even far past interval", () => {
     const state = makeState();

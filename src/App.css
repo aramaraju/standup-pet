@@ -558,9 +558,172 @@ body {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* HUD pet nudge override: smaller bounce */
-.focus-hud .pet[data-animation="nudge"] .pixel-sprite__frame {
-  animation: pet-nudge 0.5s ease-in-out infinite;
+/* --- HUD quick-actions icon row --- */
+
+.focus-hud__icons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  margin-left: 2px;
+}
+
+.focus-hud__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  font-size: 12px;
+  line-height: 1;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(245, 245, 247, 0.78);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s ease, color 0.12s ease, transform 0.08s ease;
+}
+
+.focus-hud__icon:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.focus-hud__icon:active {
+  transform: scale(0.92);
+}
+
+.focus-hud__icon--water {
+  color: #8fcdff;
+}
+
+.focus-hud__icon--water:hover {
+  background: rgba(80, 160, 240, 0.22);
+  color: #c7e6ff;
+}
+
+.focus-hud__icon-count {
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+}
+
+/* Paused state — desaturate, soften the glow */
+.focus-hud--paused {
+  background: rgba(28, 28, 32, 0.78);
+  filter: saturate(0.6);
+}
+
+.focus-hud--paused .focus-hud__time {
+  color: rgba(245, 245, 247, 0.55);
+}
+
+.focus-hud--paused .focus-hud__label {
+  color: rgba(245, 245, 247, 0.45);
+  letter-spacing: 0.12em;
+}
+
+/* --- HUD pet living animations (CSS-only, looped) --- */
+
+@keyframes pet-idle-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes pet-nudge-shake {
+  0%, 100% { transform: translateX(0) scale(1); }
+  25% { transform: translateX(-4px) scale(1.04); }
+  50% { transform: translateX(0) scale(1.02); }
+  75% { transform: translateX(4px) scale(1.04); }
+}
+
+@keyframes pet-happy-hop {
+  0%, 60%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-6px); }
+  35% { transform: translateY(0); }
+}
+
+@keyframes pet-sleep-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* Default animations keyed on data-animation on the sprite wrapper */
+.focus-hud__sprite[data-animation="idle"] .pixel-sprite__frame {
+  animation: pet-idle-bob 2s ease-in-out infinite;
+}
+
+.focus-hud__sprite[data-animation="nudge"] .pixel-sprite__frame {
+  animation: pet-nudge-shake 0.5s ease-in-out infinite;
+}
+
+.focus-hud__sprite[data-animation="happy"] .pixel-sprite__frame {
+  animation: pet-happy-hop 1.2s ease-in-out infinite;
+}
+
+.focus-hud__sprite[data-animation="sleeping"] .pixel-sprite__frame {
+  animation: pet-sleep-breathe 3s ease-in-out infinite;
+}
+
+/* --- Per-pet flavor variations --- */
+
+@keyframes pet-cat-twitch {
+  0%, 70%, 100% { transform: translateY(0) rotate(0deg); }
+  40% { transform: translateY(-3px) rotate(0deg); }
+  80% { transform: translateY(0) rotate(-2deg); }
+  90% { transform: translateY(0) rotate(2deg); }
+}
+
+@keyframes pet-dog-wag {
+  0%, 60%, 100% { transform: translateY(0) rotate(0deg); }
+  20% { transform: translateY(-6px) rotate(-3deg); }
+  30% { transform: translateY(-4px) rotate(3deg); }
+  40% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes pet-frog-bighop {
+  0%, 60%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-10px); }
+  35% { transform: translateY(0); }
+}
+
+@keyframes pet-duck-waddle {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.focus-hud__sprite[data-pet="cat"][data-animation="idle"] .pixel-sprite__frame {
+  animation: pet-cat-twitch 2.4s ease-in-out infinite;
+}
+
+.focus-hud__sprite[data-pet="dog"][data-animation="happy"] .pixel-sprite__frame {
+  animation: pet-dog-wag 1.2s ease-in-out infinite;
+}
+
+.focus-hud__sprite[data-pet="frog"][data-animation="happy"] .pixel-sprite__frame {
+  animation: pet-frog-bighop 1.2s ease-in-out infinite;
+}
+
+.focus-hud__sprite[data-pet="duck"][data-animation="idle"] .pixel-sprite__frame {
+  animation: pet-duck-waddle 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes pet-reduced-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .focus-hud__sprite[data-animation] .pixel-sprite__frame {
+    animation: pet-reduced-pulse 2.4s ease-in-out infinite !important;
+    transform: none !important;
+  }
 }
 
 /* --- Flash overlay (Raycast-style screen-edge glow) --- */

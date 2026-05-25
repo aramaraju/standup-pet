@@ -35,7 +35,7 @@
       {
         "label": "focus_hud",
         "title": "Focus",
-        "width": 220,
+        "width": 320,
         "height": 72,
         "resizable": false,
         "decorations": false,

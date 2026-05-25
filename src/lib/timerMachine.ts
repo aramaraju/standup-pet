@@ -10,6 +10,9 @@ export type MachineEvent =
   | { type: "I_MOVED" }
   | { type: "SNOOZE" }
   | { type: "START_BREAK" }
+  | { type: "PAUSE"; nowMs: number }
+  | { type: "RESUME"; nowMs: number }
+  | { type: "RESET"; nowMs: number }
   | { type: "SETTINGS_CHANGED"; settings: Partial<MachineSettings> };
 
 export interface MachineSettings {
@@ -26,6 +29,8 @@ export interface MachineState {
   remainingMs: number;
   /** How many snooze steps have been applied since last phase change */
   snoozeCount: number;
+  /** Epoch ms when paused, else null. While paused, TICK is a no-op. */
+  pausedAt: number | null;
   settings: MachineSettings;
 }
 
@@ -62,6 +67,7 @@ export function createInitialState(
     phaseStartMs: nowMs,
     remainingMs: merged.workIntervalMs,
     snoozeCount: 0,
+    pausedAt: null,
     settings: merged,
   };
 }
@@ -73,6 +79,10 @@ export function createInitialState(
 export function transition(state: MachineState, event: MachineEvent): MachineState {
   switch (event.type) {
     case "TICK": {
+      if (state.pausedAt != null) {
+        // Frozen — don't advance the clock until RESUME.
+        return state;
+      }
       const { nowMs } = event;
       const elapsed = Math.max(0, nowMs - state.phaseStartMs);
 
@@ -175,6 +185,33 @@ export function transition(state: MachineState, event: MachineEvent): MachineSta
         phaseStartMs: state.phaseStartMs,
         remainingMs: state.settings.breakDurationMs,
         snoozeCount: 0,
+      };
+    }
+
+    case "PAUSE": {
+      if (state.pausedAt != null) return state;
+      return { ...state, pausedAt: event.nowMs };
+    }
+
+    case "RESUME": {
+      if (state.pausedAt == null) return state;
+      const shift = Math.max(0, event.nowMs - state.pausedAt);
+      return {
+        ...state,
+        phaseStartMs: state.phaseStartMs + shift,
+        pausedAt: null,
+      };
+    }
+
+    case "RESET": {
+      // Restart the working phase from scratch (cancel break/break-due).
+      return {
+        ...state,
+        phase: "working",
+        phaseStartMs: event.nowMs,
+        remainingMs: state.settings.workIntervalMs,
+        snoozeCount: 0,
+        pausedAt: null,
       };
     }
 
