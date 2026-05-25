@@ -5,11 +5,24 @@ import { Timer } from "./components/Timer";
 import { Controls } from "./components/Controls";
 import { Preferences } from "./components/Preferences";
 import { ReminderBar } from "./components/ReminderBar";
+import { FocusHUD } from "./components/FocusHUD";
+import { FlashOverlay } from "./components/FlashOverlay";
+import { WaterPanel } from "./components/WaterPanel";
 import "./App.css";
 
 type View = "home" | "settings";
 
-function AppShell() {
+type AppView = "main" | "focus_hud" | "flash_overlay";
+
+function getAppView(): AppView {
+  if (typeof window === "undefined") return "main";
+  const params = new URLSearchParams(window.location.search);
+  const v = params.get("view");
+  if (v === "focus_hud" || v === "flash_overlay") return v;
+  return "main";
+}
+
+function MainShell() {
   const [view, setView] = useState<View>("home");
 
   return (
@@ -33,6 +46,7 @@ function AppShell() {
             <Pet />
             <Timer />
             <Controls />
+            <WaterPanel />
           </>
         ) : (
           <Preferences />
@@ -45,9 +59,24 @@ function AppShell() {
 }
 
 function App() {
+  const appView = getAppView();
+
+  if (appView === "focus_hud") {
+    return (
+      <StoreProvider>
+        <FocusHUD />
+      </StoreProvider>
+    );
+  }
+
+  if (appView === "flash_overlay") {
+    // No store needed — overlay just listens for events.
+    return <FlashOverlay />;
+  }
+
   return (
     <StoreProvider>
-      <AppShell />
+      <MainShell />
     </StoreProvider>
   );
 }

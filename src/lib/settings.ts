@@ -5,6 +5,7 @@
 
 import { DEFAULT_SETTINGS, type MachineSettings } from "./timerMachine";
 import { DEFAULT_APP_PET, isPetChoice, type PetChoice } from "./pets";
+import { DEFAULT_WATER_SETTINGS, sanitizeWaterSettings, type WaterSettings } from "./water";
 
 export type { PetChoice };
 
@@ -13,6 +14,7 @@ export interface AppSettings extends MachineSettings {
   launchAtLogin: boolean;
   petChoice: PetChoice;
   notificationsEnabled: boolean;
+  water: WaterSettings;
 }
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
@@ -21,6 +23,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   launchAtLogin: false,
   petChoice: DEFAULT_APP_PET,
   notificationsEnabled: true,
+  water: DEFAULT_WATER_SETTINGS,
 };
 
 /**
@@ -78,6 +81,9 @@ export function deserializeSettings(raw: unknown): AppSettings {
     notificationsEnabled: sanitizeBoolean(
       obj.notificationsEnabled,
       DEFAULT_APP_SETTINGS.notificationsEnabled
+    ),
+    water: sanitizeWaterSettings(
+      (obj.water as Partial<WaterSettings> | undefined) ?? undefined
     ),
   };
 }

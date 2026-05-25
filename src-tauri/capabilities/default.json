@@ -1,8 +1,8 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capability for the menu bar popover window",
-  "windows": ["main"],
+  "description": "Capabilities for main, focus HUD, and flash overlay windows",
+  "windows": ["main", "focus_hud", "flash_overlay"],
   "permissions": [
     "core:default",
     "core:tray:default",
@@ -10,9 +10,22 @@
     "core:window:allow-show",
     "core:window:allow-hide",
     "core:window:allow-set-position",
+    "core:window:allow-set-size",
     "core:window:allow-set-focus",
     "core:window:allow-is-visible",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-set-ignore-cursor-events",
+    "core:webview:default",
+    "core:webview:allow-set-webview-position",
     "opener:default",
-    "allow-set-tray-icon"
+    "notification:default",
+    "notification:allow-notify",
+    "notification:allow-request-permission",
+    "notification:allow-is-permission-granted",
+    "allow-set-tray-icon",
+    "allow-flash-border",
+    "allow-show-main-window",
+    "allow-position-focus-hud"
   ]
 }

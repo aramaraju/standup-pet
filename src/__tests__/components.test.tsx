@@ -9,6 +9,7 @@ import React from "react";
 import { StoreContext, type StoreContextValue, type StoreState } from "../lib/store";
 import { createInitialState } from "../lib/timerMachine";
 import { DEFAULT_APP_SETTINGS } from "../lib/settings";
+import { createInitialWaterState } from "../lib/water";
 import { Pet } from "../components/Pet";
 import { Timer, formatMs } from "../components/Timer";
 import { Controls } from "../components/Controls";
@@ -31,6 +32,7 @@ function makeStoreState(overrides: Partial<StoreState["machine"]> = {}): StoreSt
   return {
     machine,
     settings: { ...DEFAULT_APP_SETTINGS },
+    water: createInitialWaterState(NOW, DEFAULT_APP_SETTINGS.water),
   };
 }
 
