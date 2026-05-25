@@ -48,6 +48,9 @@
     ],
     "macOS": {
       "minimumSystemVersion": "13.0"
+    },
+    "resources": {
+      "icons/tray/": "icons/tray/"
     }
   }
 }

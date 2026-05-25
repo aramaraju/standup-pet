@@ -15,7 +15,8 @@ Standup Pet is a gentle, charming reminder to take movement breaks throughout th
 - Configurable work intervals (default 50 min) and break durations (default 7 min)
 - "I moved" acknowledges your break and resets the cycle
 - Snooze option (up to 15 min total)
-- Pick from 8 pixel companions (cat, dog, frog, turtle, pig, duck, wolf, bear)
+- Pick from 8 pixel companions (cat, dog, frog, turtle, pig, duck, wolf, bear) — real 16×16 pixel art, not emoji
+- Menu bar icon shows your current pet and updates when mood changes
 - Raycast Focus–style floating reminder bar when it's time to move
 - Optional passive system notifications that won't steal focus
 - Settings persist across restarts
@@ -40,6 +41,12 @@ npm run dev
 
 # macOS menu bar app (frontend + native tray popover)
 npm run tauri dev
+```
+
+Regenerate menu bar PNGs after editing sprites:
+
+```bash
+npm run generate:tray-icons
 ```
 
 On macOS this runs as a **menu bar utility** (no Dock icon): look for the tray icon near the clock, click it to open the popover. Right-click the icon for **Quit**.

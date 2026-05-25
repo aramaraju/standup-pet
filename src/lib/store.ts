@@ -16,6 +16,8 @@ import {
   type AppSettings,
 } from "./settings";
 import { notifyBreakDue, onPhaseChange } from "./reminders";
+import { phaseToAnimation } from "./spriteState";
+import { syncTrayIcon } from "./traySync";
 
 const SETTINGS_KEY = "standup-pet-settings";
 
@@ -141,6 +143,12 @@ export function StoreProvider({ persistence = localStoragePersistence, children 
       state.settings.notificationsEnabled
     );
   }, [phase, state.settings.petChoice, state.settings.notificationsEnabled]);
+
+  // Menu bar icon reflects current pet + mood
+  const trayAnimation = phaseToAnimation(phase);
+  useEffect(() => {
+    void syncTrayIcon(state.settings.petChoice, trayAnimation);
+  }, [state.settings.petChoice, trayAnimation]);
 
   return React.createElement(StoreContext.Provider, { value: { state, dispatch } }, children);
 }

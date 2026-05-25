@@ -12,7 +12,8 @@
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "npm run typecheck && npm run lint && npm run test && vite build"
+    "verify": "npm run typecheck && npm run lint && npm run test && vite build",
+    "generate:tray-icons": "tsx scripts/generate-tray-icons.ts"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
